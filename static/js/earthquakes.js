@@ -1,34 +1,34 @@
 // 
 function createFeatures(earthquakeData) {
     
+    // 
     function pointToLayer(feature, latlng) {
-        // var latlng = [feature.geometry.coordinates[1], feature.geometry.coordinates[2]]
-        
-        // var fill_color = ''
-
+        // 
         var magnitude = feature.properties.mag
 
+        // 
         switch (true) {
             case magnitude <= 1:
-                fill_color = 'green';
-                break;
-            case magnitude > 1 && magnitude <= 2:
                 fill_color = 'lightgreen';
                 break;
+            case magnitude > 1 && magnitude <= 2:
+                fill_color = 'yellowgreen';
+                break;
             case magnitude > 2 && magnitude <=3:
-                fill_color = 'yellow';
+                fill_color = 'gold';
                 break;
             case magnitude > 3 && magnitude <=4:
-                fill_color = 'orange';
+                fill_color = 'darkorange';
                 break;
             case magnitude > 4 && magnitude <=5:
-                fill_color = 'orangered';
+                fill_color = 'tomato';
                 break;
             case magnitude > 5:
                 fill_color = 'red';
                 break
         }
         
+        // 
         return L.circleMarker(latlng, {
             radius: (magnitude * 4),
             weight: 1,
