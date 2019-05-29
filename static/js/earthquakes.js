@@ -1,7 +1,14 @@
-// 
-function createFeatures(earthquakeData) {
-    
+(async function() {
+    // Set URL to geojson data
+    const url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
+
     // 
+    const data = await d3.json(url)
+
+    const url_plates = 'https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json'
+
+    const data_plates = await d3.json(url_plates)
+
     function pointToLayer(feature, latlng) {
         // 
         var magnitude = feature.properties.mag
@@ -46,18 +53,25 @@ function createFeatures(earthquakeData) {
             <p>More info <a href='${feature.properties.url}' target='_blank'>here</a></p>`)
     }
 
+    function platesPointToLayer(latlng) {
+        return L.polyline(latlng, {})
+    }
+
     // 
-    const features = L.geoJSON(earthquakeData, {
+    const features = L.geoJSON(data, {
         onEachFeature : onEachFeature,
         pointToLayer : pointToLayer
     })
 
-    // 
-    createMap(features)
-}
-
-// 
-function createMap(features) {
+    const plates = L.geoJSON(data_plates, {
+        style: function() {
+            return {
+                color: 'orange',
+                weight: 2,
+            }  
+        },
+        platePointToLayer: platesPointToLayer
+    })
 
     // 
     const outdoorsMap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
@@ -77,36 +91,25 @@ function createMap(features) {
 
     // 
     const baseMaps = {
-        'Outdoors map' : outdoorsMap,
-        'Satellite map' : satelliteMap
+        'Outdoors' : outdoorsMap,
+        'Satellite' : satelliteMap
     }
 
     // 
     const overlayMaps = {
-        Earthquakes: features
+        Earthquakes: features,
+        'Fault Lines': plates
     }
 
     // 
     const myMap = L.map("map", {
         center: [37.09, -95.71],
         zoom: 3,
-        layers: [outdoorsMap, features]
+        layers: [outdoorsMap, features, plates]
     })
 
     // 
     L.control.layers(baseMaps, overlayMaps, {
         collapsed: false
     }).addTo(myMap)
-
-}
-
-(async function() {
-    // Set URL to geojson data
-    const url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
-
-    // 
-    const data = await d3.json(url)
-
-    // 
-    createFeatures(data.features)
 })()
