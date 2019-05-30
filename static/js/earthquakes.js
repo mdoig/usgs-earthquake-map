@@ -9,38 +9,21 @@
 
     const data_plates = await d3.json(url_plates)
 
-    function pointToLayer(feature, latlng) {
-        // 
-        var magnitude = feature.properties.mag
+    function getColor(m) {
+        return m > 5 ? 'red':
+                m > 4 && m <= 5 ? 'tomato':
+                m > 3 && m <= 4 ? 'darkorange':
+                m > 2 && m <= 3 ? 'gold':
+                m > 1 && m <= 2 ? 'yellowgreen':
+                                  'lightgreen'
+    }
 
-        // 
-        switch (true) {
-            case magnitude <= 1:
-                fill_color = 'lightgreen';
-                break;
-            case magnitude > 1 && magnitude <= 2:
-                fill_color = 'yellowgreen';
-                break;
-            case magnitude > 2 && magnitude <=3:
-                fill_color = 'gold';
-                break;
-            case magnitude > 3 && magnitude <=4:
-                fill_color = 'darkorange';
-                break;
-            case magnitude > 4 && magnitude <=5:
-                fill_color = 'tomato';
-                break;
-            case magnitude > 5:
-                fill_color = 'red';
-                break
-        }
-        
-        // 
+    // 
+    function pointToLayer(feature, latlng) {
         return L.circleMarker(latlng, {
-            radius: (magnitude * 4),
-            weight: 1,
-            color: 'black',
-            fillColor: fill_color,
+            radius: (feature.properties.mag * 4),
+            stroke: false,
+            fillColor: getColor(feature.properties.mag),
             fillOpacity: 1
         })
     }
@@ -53,6 +36,7 @@
             <p>More info <a href='${feature.properties.url}' target='_blank'>here</a></p>`)
     }
 
+    // 
     function platesPointToLayer(latlng) {
         return L.polyline(latlng, {})
     }
@@ -85,7 +69,7 @@
     const satelliteMap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
         attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
         maxZoom: 18,
-        id: "mapbox.satellite",
+        id: "mapbox.streets-satellite",
         accessToken: API_KEY
     })
 
@@ -112,4 +96,22 @@
     L.control.layers(baseMaps, overlayMaps, {
         collapsed: false
     }).addTo(myMap)
+
+    // 
+    const legend = L.control({position: 'bottomright'})
+
+    legend.onAdd = function() {
+        const div = L.DomUtil.create('div', 'legend'),
+              magnitudes = [0, 1, 2, 3, 4, 5]
+
+        for (var i = 0; i < magnitudes.length; i++) {
+            div.innerHTML +=
+                '<i style="background:' + getColor(magnitudes[i] + 1) + '"></i> ' +
+                magnitudes[i] + (magnitudes[i + 1] ? '&ndash;' + magnitudes[i + 1] + '<br>' : '+');
+        }
+
+        return div
+    }
+
+    legend.addTo(myMap)
 })()
