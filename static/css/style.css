@@ -10,8 +10,9 @@ html {
   height: 100%;
 }
 
+/* add styling for legend and legend components */
 .legend {
-  padding: 10px;
+  padding: 0 10px 10px 10px;
   line-height: 18px;
   color: #555;
   background-color: white;
